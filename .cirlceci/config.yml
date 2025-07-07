@@ -1,0 +1,89 @@
+version: '2.1'
+orbs:
+  aws-ecr: circleci/aws-ecr@7.2.0
+  slack: circleci/slack@4.4.4
+  aws-cli: circleci/aws-cli@1.2.1
+
+jobs:
+  build_and_push_ecr:
+    parameters:
+      dockerfile_name:
+        type: string
+        default: Dockerfile
+      repo_name:
+        type: string
+    docker:
+      - image: cimg/base:2021.04
+    steps:   
+      - checkout
+      - setup_remote_docker:
+          version: docker24
+      - aws-ecr/build-and-push-image:
+          account-url: AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: << parameters.dockerfile_name >>
+          no-output-timeout: 20m
+          extra-build-args: --build-arg CUSTOM_ENV_FILE_NAME=<< parameters.env_file_name >>
+          region: AWS_DEFAULT_REGION
+          repo: << parameters.repo_name >>
+          skip-when-tags-exist: false
+          tag: "latest,$CIRCLE_SHA1"
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+
+  # build_and_push:
+  #   parameters:
+  #     dockerfile_name:
+  #       type: string
+  #       default: Dockerfile
+  #     repo_name:
+  #       type: string
+  #     env_file_name:
+  #       type: string
+  #   docker:
+  #     - image: cimg/base:2021.04
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         version: docker24
+  #         docker_layer_caching: true
+  #     - run:
+  #         name: Build Docker image
+  #         command: |
+  #           docker build --build-arg CUSTOM_ENV_FILE_NAME=<< parameters.env_file_name >> -t $REGISTRY_ADDRESS/<< parameters.repo_name >>:latest -f << parameters.dockerfile_name >> .
+  #           docker tag $REGISTRY_ADDRESS/<< parameters.repo_name >>:latest $REGISTRY_ADDRESS/<< parameters.repo_name >>:$CIRCLE_SHA1
+  #     - run:
+  #         name: Publish Docker Image to Private Registry
+  #         command: |
+  #           echo "$REGISTRY_PASSWD" | docker login $REGISTRY_ADDRESS -u "$REGISTRY_USERNAME" --password-stdin
+  #           docker push $REGISTRY_ADDRESS/<< parameters.repo_name >>:latest
+  #           docker push $REGISTRY_ADDRESS/<< parameters.repo_name >>:$CIRCLE_SHA1
+  #     - slack/notify:
+  #         event: fail
+  #         template: basic_fail_1
+  #     - slack/notify:
+  #         event: pass
+  #         template: basic_success_1      
+workflows:        
+  development:
+    jobs:
+      - build_and_push_ecr:
+          dockerfile_name: app-frontend/Dockerfile
+          repo_name: 'app-frontend'
+          filters:
+            branches:
+              only: main
+          context: DEMO-CONTEXT
+      - build_and_push_ecr:
+          dockerfile_name: login-api/Dockerfile
+          repo_name: 'login-api'
+          filters:
+            branches:
+              only: main
+          context: DEMO-CONTEXT

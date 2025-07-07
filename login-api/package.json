@@ -1,0 +1,15 @@
+{
+  "name": "login-api",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js",
+    "init": "node init-db.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0"
+  }
+}
