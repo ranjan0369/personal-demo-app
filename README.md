@@ -31,7 +31,7 @@ This project is a full-stack web application that demonstrates how to set up a *
 │   └── ...
 ├── login-api/                 # Node.js backend
 │   ├── ...
-├── .cirleci/                   # GitHub Actions CI configs
+├── .cirleci/                   # Circle CI configs
 │   └── config.yml
 └── README.md
 
@@ -46,7 +46,7 @@ This project is a full-stack web application that demonstrates how to set up a *
 ```bash
 git clone https://github.com/ranjan0369/personal-demo-app.git
 cd personal-demo-app
-
+````
 ### 2. Build the image
 
 As soon as push is maid into the main branch a circleci pipeline is triggered which build and pushes the image to ECR.
