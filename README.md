@@ -1,6 +1,3 @@
-### 📄 `README.md`
-
-```markdown
 # CI Setup for Simple Node.js Application
 
 This project is a full-stack web application that demonstrates how to set up a **Continuous Integration (CI) pipeline** for a Node.js backend with a React.js frontend and a MySQL database. It includes a sample CI setup using GitHub Actions to automate testing and deployment workflows.
